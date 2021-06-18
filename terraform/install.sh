@@ -209,54 +209,6 @@ applyTerraform() {
   fi
 }
 
-authenticateCluster() {
-  CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $project_id --format="value(zone)")
-  gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
-  # Make alias for this kubectl context
-  kubectx main=.
-}
-
-installMonitoring() {
-  log "Retrieving the external IP address of the application..."
-  TRIES=0
-  external_ip="";
-  while [[ -z $external_ip && "${TRIES}" -lt 20 ]]; do
-     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
-     [ -z "$external_ip" ] && sleep 5;
-     TRIES=$((TRIES + 1))
-  done;
-
-  if [[ -z $external_ip ]]; then
-    log "Could not retrieve external IP... skipping monitoring configuration."
-    return 1
-  fi
-
-  acct=$(gcloud info --format="value(config.account)")
-
-  log "Checking to make sure necessary Istio services are ready for monitoring"
-  python3 monitoring/istio_service_setup.py $project_id $CLUSTER_ZONE $service_wait
-  log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
-  pushd monitoring/
-  terraform init -lock=false
-  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}"
-  popd
-}
-
-getExternalIp() {
-  external_ip="";
-  while [ -z $external_ip ]; do
-     log "Waiting for Hipster Shop endpoint...";
-     external_ip=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}');
-     [ -z "$external_ip" ] && sleep 10;
-  done;
-  if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
-      log "Hipster Shop app is available at http://$external_ip"
-      sendTelemetry $project_id hipstershop-available
-  else
-      log "error: Hipsterhop app at http://$external_ip is unreachable"
-      sendTelemetry $project_id hipstershop-unavailable
-  fi
-}
 
 # Start generating synthetic traffic to Sandbox for a few seconds then stop
 # This produces initial interesting telemetry data for users to view
@@ -409,10 +361,6 @@ getOrCreateBucket;
 
 # deploy
 applyTerraform;
-authenticateCluster;
-# || true to prevent errors during monitoring setup from stopping the installation script
-installMonitoring || true;
-getExternalIp;
 if [[ -z "${skip_loadgen}" ]]; then
   loadGen;
 fi

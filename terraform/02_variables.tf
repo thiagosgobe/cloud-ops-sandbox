@@ -27,12 +27,34 @@ variable "project_id" {
   description = "The id of your project. Case-sensitive."
 }
 
-variable "bucket_name" {
+variable "account_email" {
+  default     = null
   type        = string
-  description = "The name of your bucket to store the state file. Case-sensitive."
+  description = "The account email. ."
 }
+
+#AppEngine 
+variable "appengine_region" {
+  default     = "us-east1"
+  description = "App Engine defult GCP region."
+}
+
+#GKE Services Cluster
+variable "gke_cluster_name" {
+  default     = "cloud-ops-sandbox"
+  description = "GKE Hipstershop default cluster name."
+}
+
+#Loadgen
 
 variable "skip_loadgen" {
   default     = false
   description = "If true, the load generator will not be deployed."
+}
+
+
+#Monitoring
+variable "skip_alerts" {
+  default     = false
+  description = "If true, alerting will not be deployed."
 }

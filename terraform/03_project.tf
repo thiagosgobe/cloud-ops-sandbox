@@ -29,51 +29,39 @@ data "google_project" "project" {
 }
 
 resource "google_project_service" "iam" {
-  project = data.google_project.project.project_id
-
-  service = "iam.googleapis.com"
-
+  project                    = data.google_project.project.project_id
+  service                    = "iam.googleapis.com"
   disable_dependent_services = true
 }
 
 resource "google_project_service" "compute" {
-  project = data.google_project.project.project_id
-
-  service = "compute.googleapis.com"
-
+  project                    = data.google_project.project.project_id
+  service                    = "compute.googleapis.com"
   disable_dependent_services = true
 }
 
 resource "google_project_service" "clouddebugger" {
-  project = data.google_project.project.project_id
-
-  service = "clouddebugger.googleapis.com"
-
+  project                    = data.google_project.project.project_id
+  service                    = "clouddebugger.googleapis.com"
   disable_dependent_services = true
 }
 
 
 resource "google_project_service" "cloudtrace" {
-  project = data.google_project.project.project_id
-
-  service = "cloudtrace.googleapis.com"
-
+  project                    = data.google_project.project.project_id
+  service                    = "cloudtrace.googleapis.com"
   disable_dependent_services = true
 }
 
 resource "google_project_service" "errorreporting" {
-  project = data.google_project.project.project_id
-
-  service = "clouderrorreporting.googleapis.com"
-
+  project                    = data.google_project.project.project_id
+  service                    = "clouderrorreporting.googleapis.com"
   disable_dependent_services = true
 }
 
 resource "google_project_service" "sourcerepo" {
-  project = data.google_project.project.project_id
-
-  service = "sourcerepo.googleapis.com"
-
+  project                    = data.google_project.project.project_id
+  service                    = "sourcerepo.googleapis.com"
   disable_dependent_services = true
 }
 
@@ -98,9 +86,7 @@ resource "google_project_service" "gke" {
   #
   # Anyway, expect to see a lot more of these. I won't explain every time.
   project = data.google_project.project.project_id
-
   # the service URI we want to enable
-  service = "container.googleapis.com"
-
+  service                    = "container.googleapis.com"
   disable_dependent_services = true
 }

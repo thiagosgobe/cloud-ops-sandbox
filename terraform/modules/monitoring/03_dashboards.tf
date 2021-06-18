@@ -17,50 +17,50 @@
 # of requests, distribution of types of requests, and response types. The JSON object
 # containing the exact details of the dashboard can be found in the 'dashboards' folder.
 resource "google_monitoring_dashboard" "userexp_dashboard" {
-  dashboard_json = file("./dashboards/userexp_dashboard.json")
+  dashboard_json = file("./modules/monitoring/dashboards/userexp_dashboard.json")
 }
 
 # Creates a dashboard for the frontend service. The details of the charts
 # in the dashboard can be found in the JSON specification file.
 resource "google_monitoring_dashboard" "frontend_dashboard" {
-  dashboard_json = file("./dashboards/frontend_dashboard.json")
+  dashboard_json = file("./modules/monitoring/dashboards/frontend_dashboard.json")
 }
 
 # Creates a dashboard for the adservice. The details of the charts
 # in the dashboard can be found in the JSON specification file.
 resource "google_monitoring_dashboard" "adservice_dashboard" {
-  dashboard_json = file("./dashboards/adservice_dashboard.json")
+  dashboard_json = file("./modules/monitoring/dashboards/adservice_dashboard.json")
 }
 
 # Creates a dashboard for the recommendationservice. The details of the charts
 # in the dashboard can be found in the JSON specification file.
 resource "google_monitoring_dashboard" "recommendationservice_dashboard" {
-  dashboard_json = file("./dashboards/recommendationservice_dashboard.json")
+  dashboard_json = file("./modules/monitoring/dashboards/recommendationservice_dashboard.json")
 }
 
 # Creates a dashboard for the cartservice.
 resource "google_monitoring_dashboard" "cartservice_dashboard" {
-  dashboard_json = file("./dashboards/cartservice_dashboard.json")
+  dashboard_json = file("./modules/monitoring/dashboards/cartservice_dashboard.json")
 }
 
 # Creates a dashboard for the checkoutservice.
 resource "google_monitoring_dashboard" "checkoutservice_dashboard" {
-  dashboard_json = file("./dashboards/checkoutservice_dashboard.json")
+  dashboard_json = file("./modules/monitoring/dashboards/checkoutservice_dashboard.json")
 }
 
 # Creates a dashboard for the currencyservice.
 resource "google_monitoring_dashboard" "currencyservice_dashboard" {
-  dashboard_json = file("./dashboards/currencyservice_dashboard.json")
+  dashboard_json = file("./modules/monitoring/dashboards/currencyservice_dashboard.json")
 }
 
 # Creates a dashboard for the productcatalogservice.
 resource "google_monitoring_dashboard" "productcatalogservice_dashboard" {
-  dashboard_json = file("./dashboards/productcatalogservice_dashboard.json")
+  dashboard_json = file("./modules/monitoring/dashboards/productcatalogservice_dashboard.json")
 }
 
 # Creates a dashboard for the ratingservice.
 resource "google_monitoring_dashboard" "ratingservice_dashboard" {
-  dashboard_json = file("./dashboards/ratingservice_dashboard.json")
+  dashboard_json = file("./modules/monitoring/dashboards/ratingservice_dashboard.json")
 }
 
 # Create generic dashboards for three of the microservices. Since all three microservices
@@ -69,31 +69,12 @@ resource "google_monitoring_dashboard" "ratingservice_dashboard" {
 
 # Define specifics for each of the services that will receive a generic dashboard.
 # We need the service name for dashboard and chart titles, and we need the service ID to use as a metadata filter.
-variable "services" {
-  type = list(object({
-    service_name = string,
-    service_id   = string
-  }))
-  default = [
-    {
-      service_name = "Payment Service"
-      service_id   = "paymentservice"
-    },
-    {
-      service_name = "Email Service"
-      service_id   = "emailservice"
-    },
-    {
-      service_name = "Shipping Service"
-      service_id   = "shippingservice"
-    }
-  ]
-}
+
 
 # Iterate over the services that we defined and create a dashboard template file for each one using
 # the template file defined in the 'dashboards' folder.
 data "template_file" "dash_json" {
-  template = file("./dashboards/generic_dashboard.tmpl")
+  template = file("./modules/monitoring/dashboards/generic_dashboard.tmpl")
   count    = length(var.services)
   vars = {
     service_name = var.services[count.index].service_name

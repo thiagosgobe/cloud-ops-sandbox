@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# We use gcs as our backend, so the state file will be stored
-# in a storage bucket. Since the bucket must preexists, we will create 
-# the project and bucket outside Terraform. Also since the configuration
-# of bucket can't be a variable, we create an empty config and modify it
-# in the data section.
-
-terraform {
-  backend "gcs" {
-
-  }
+module "loadgen" {
+  source      = "./modules/loadgen"
+  count       = var.skip_loadgen ? 0 : 1
+  external_ip = google_container_cluster.gke.endpoint
+  project_id  = data.google_project.project.project_id
+  depends_on  = [null_resource.delay]
 }
-
-data "terraform_remote_state" "state" {
-  backend = "gcs"
-  config = {
-    bucket = "${var.project_id}-bucket"
-  }
-}
- 

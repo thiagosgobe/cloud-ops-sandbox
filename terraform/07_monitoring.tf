@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module "loadgen" {
-  source = "./loadgen"
-
-  count = "${var.skip_loadgen ? 0 : 1}"
-
-  external_ip = data.external.terraform_vars.result.external_ip
-  project_id = data.google_project.project.project_id
-
-  depends_on = [null_resource.delay]
+module "monitoring" {
+  source = "./modules/monitoring"
+  #Skip alerts in case it's not "prod"  
+  count               = var.skip_alerts ? 0 : 1
+  project_id          = data.google_project.project.project_id
+  zone                = google_container_cluster.gke.location
+  external_ip         = google_container_cluster.gke.endpoint
+  project_owner_email = var.account_email
 }

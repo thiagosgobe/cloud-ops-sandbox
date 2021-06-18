@@ -18,7 +18,7 @@
 # zone in us-central1 at random.
 resource "random_shuffle" "zone" {
   # TODO: add us-central1-a and us-central1-c once GKE completely rolls out Oct 2 release
-  input = ["us-central1-b", "us-central1-f"]
+  input = ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"]
 
   # Seeding the RNG is technically optional but while building this we
   # found that it only ever picked `us-central-1c` unless we seeded it. Here
@@ -41,11 +41,11 @@ resource "random_shuffle" "zone" {
 # replicates what the Hipster Shop README creates. If you want to see what else
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke" {
-  provider = google-beta
-  project  = data.google_project.project.project_id
+  #provider = google-beta
+  project = data.google_project.project.project_id
 
   # Here's how you specify the name
-  name = "cloud-ops-sandbox"
+  name = var.gke_cluster_name
 
   # Set the zone by grabbing the result of the random_shuffle above. It
   # returns a list so we have to pull the first element off. If you're looking
@@ -141,12 +141,10 @@ data "google_compute_default_service_account" "default" {
 # Create GSA/KSA binding: let IAM auth KSAs as a svc.id.goog member name
 resource "google_service_account_iam_binding" "set_gsa_binding" {
   service_account_id = data.google_compute_default_service_account.default.name // google_service_account.set_gsa.name
-  role = "roles/iam.workloadIdentityUser"
-
+  role               = "roles/iam.workloadIdentityUser"
   members = [
     "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[default/default]"
   ]
-
   depends_on = [data.google_compute_default_service_account.default]
 }
 
@@ -155,14 +153,12 @@ resource "null_resource" "annotate_ksa" {
   triggers = {
     cluster_ep = google_container_cluster.gke.endpoint #kubernetes cluster endpoint
   }
-
   provisioner "local-exec" {
     command = <<EOT
       gcloud container clusters get-credentials cloud-ops-sandbox --zone ${element(random_shuffle.zone.result, 0)} --project ${data.google_project.project.project_id}
       kubectl annotate serviceaccount --namespace default default iam.gke.io/gcp-service-account=${data.google_compute_default_service_account.default.email}
     EOT
   }
-
   depends_on = [google_service_account_iam_binding.set_gsa_binding]
 }
 
@@ -171,7 +167,6 @@ resource "null_resource" "install_istio" {
   provisioner "local-exec" {
     command = "./istio/install_istio.sh"
   }
-
   depends_on = [null_resource.annotate_ksa]
 }
 
@@ -220,8 +215,9 @@ resource "null_resource" "delay" {
     "before" = null_resource.deploy_services.id
   }
 }
-
+/* 
 data "external" "terraform_vars" {
   program    = ["/bin/bash", "${path.module}/get_terraform_vars.sh"]
   depends_on = [null_resource.delay]
 }
+ */
