@@ -27,7 +27,7 @@ terraform {
 data "terraform_remote_state" "state" {
   backend = "gcs"
   config = {
-    bucket = "${var.project_id}-bucket"
+    bucket = var.bucket_name
   }
 }
  

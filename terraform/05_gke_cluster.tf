@@ -119,6 +119,13 @@ resource "google_container_cluster" "gke" {
   # eventual consistency problems we have with the API but it will make sure
   # that we're at least trying to do things in the right order.
   depends_on = [google_project_service.gke]
+
+  addons_config {
+    istio_config {
+      disabled = false
+      auth     = "AUTH_NONE"
+    }
+  }
 }
 
 
@@ -162,14 +169,6 @@ resource "null_resource" "annotate_ksa" {
   depends_on = [google_service_account_iam_binding.set_gsa_binding]
 }
 
-# Install Istio into the GKE cluster
-resource "null_resource" "install_istio" {
-  provisioner "local-exec" {
-    command = "./istio/install_istio.sh"
-  }
-  depends_on = [null_resource.annotate_ksa]
-}
-
 # Deploy microservices into GKE cluster
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
@@ -190,7 +189,6 @@ resource "null_resource" "deploy_services" {
   EOT
   }
 
-  depends_on = [null_resource.install_istio]
 }
 
 # We wait for all of our microservices to become available on kubernetes
