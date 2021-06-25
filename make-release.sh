@@ -35,12 +35,9 @@ find "${REPO_ROOT}/loadgenerator-manifests" -name '*.yaml' -exec sed -i -e "s/:l
 sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/README.md;
 sed -i -e "s/uncertified:v\([0-9\.]\+\)/uncertified:${NEW_VERSION}/g" ${REPO_ROOT}/README.md;
 
-# update website deployment tag
-sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/website/layouts/index.html;
-sed -i -e "s/uncertified:v\([0-9\.]\+\)/uncertified:${NEW_VERSION}/g" ${REPO_ROOT}/website/layouts/index.html;
-sed -i -e "s/cloudshell_git_branch=v\([0-9\.]\+\)/cloudshell_git_branch=${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
-sed -i -e "s/uncertified:v\([0-9\.]\+\)/uncertified:${NEW_VERSION}/g" ${REPO_ROOT}/website/deploy/index.html;
-
+# update website version tag
+sed -i -e "s/cloudOpsSandboxVersion=\"v\([0-9\.]\+\)\"/cloudOpsSandboxVersion=\"${NEW_VERSION}\"/g" ${REPO_ROOT}/website/layouts/index.html;
+sed -i -e "s/cloudOpsSandboxVersion=\"v\([0-9\.]\+\)\"/cloudOpsSandboxVersion=\"${NEW_VERSION}\"/g" ${REPO_ROOT}/website/deploy/index.html;
 
 # update custom Cloud Shell image variable
 sed -i -e "s/VERSION=v\([0-9\.]\+\)/VERSION=${NEW_VERSION}/g" ${REPO_ROOT}/cloud-shell/Dockerfile;
