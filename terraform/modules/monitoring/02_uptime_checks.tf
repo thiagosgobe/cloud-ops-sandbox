@@ -70,6 +70,6 @@ resource "google_monitoring_notification_channel" "basic" {
   display_name = "Google Project Owner Account Email"
   type         = "email"
   labels = {
-    email_address = "${var.project_owner_email}"
+    email_address = "${var.account_email}"
   }
 }

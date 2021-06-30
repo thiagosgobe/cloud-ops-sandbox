@@ -41,8 +41,8 @@ resource "random_shuffle" "zone" {
 # replicates what the Hipster Shop README creates. If you want to see what else
 # is possible, check out the docs: https://www.terraform.io/docs/providers/google/r/container_cluster.html
 resource "google_container_cluster" "gke" {
-  #provider = google-beta
-  project = data.google_project.project.project_id
+  provider = google-beta
+  project  = data.google_project.project.project_id
 
   # Here's how you specify the name
   name = var.gke_cluster_name
@@ -94,7 +94,7 @@ resource "google_container_cluster" "gke" {
     initial_node_count = 2
 
     autoscaling {
-      min_node_count = 3
+      min_node_count = 2
       max_node_count = 10
     }
 
@@ -213,9 +213,3 @@ resource "null_resource" "delay" {
     "before" = null_resource.deploy_services.id
   }
 }
-/* 
-data "external" "terraform_vars" {
-  program    = ["/bin/bash", "${path.module}/get_terraform_vars.sh"]
-  depends_on = [null_resource.delay]
-}
- */

@@ -20,6 +20,7 @@ resource "google_cloud_scheduler_job" "recollect_job" {
   description      = "recollect recently posted new votes"
   time_zone        = "Europe/London"
   attempt_deadline = "340s"
+  region           = var.gcp_region_name
 
   retry_config {
     min_backoff_duration = "1s"

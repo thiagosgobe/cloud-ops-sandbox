@@ -24,7 +24,7 @@ resource "random_shuffle" "zone" {
   # found that it returned the same zone every time unless we seeded it. Here
   # we're using the ID of the project as a seed because it is unique to the
   # project but will not change, thereby guaranteeing stability of the results.
-  seed = var.project_id
+  seed = data.google_project.project.project_id
 }
 
 # First we create the cluster. If you're wondering where all the sizing details
@@ -129,7 +129,7 @@ resource "null_resource" "set_env_vars" {
 # Deploy loadgenerator into GKE cluster 
 resource "null_resource" "deploy_services" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/../../loadgenerator-manifests/loadgenerator.yaml"
+    command = "kubectl apply -f ${path.module}/../../../loadgenerator-manifests/loadgenerator.yaml"
   }
 
   depends_on = [

@@ -20,4 +20,5 @@ module "monitoring" {
   zone                = google_container_cluster.gke.location
   external_ip         = google_container_cluster.gke.endpoint
   project_owner_email = var.account_email
+  gca_service         = gca_service.service
 }

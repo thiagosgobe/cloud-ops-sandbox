@@ -58,11 +58,6 @@ resource "google_monitoring_dashboard" "productcatalogservice_dashboard" {
   dashboard_json = file("./modules/monitoring/dashboards/productcatalogservice_dashboard.json")
 }
 
-# Creates a dashboard for the ratingservice.
-resource "google_monitoring_dashboard" "ratingservice_dashboard" {
-  dashboard_json = file("./modules/monitoring/dashboards/ratingservice_dashboard.json")
-}
-
 # Create generic dashboards for three of the microservices. Since all three microservices
 # will share the same charts across their dashboards, we can leverage Terraform template files
 # in order to reproduce identical dashboards for each microservice.

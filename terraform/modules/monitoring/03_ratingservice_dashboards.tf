@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# We use gcs as our backend, so the state file will be stored
-# in a storage bucket. Since the bucket must preexists, we will create 
-# the project and bucket outside Terraform. Also since the configuration
-# of bucket can't be a variable, we create an empty config and modify it
-# in the data section.
-
-terraform {
-  backend "gcs" {
-
-  }
+# Creates a dashboard for the ratingservice.
+resource "google_monitoring_dashboard" "ratingservice_dashboard" {
+  dashboard_json = file("./modules/monitoring/dashboards/ratingservice_dashboard.json")
 }
-
-data "terraform_remote_state" "state" {
-  backend = "gcs"
-  config = {
-    bucket = "${var.project_id}-bucket"
-  }
-}
- 

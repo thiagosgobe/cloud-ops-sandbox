@@ -28,9 +28,8 @@ variable "project_id" {
 }
 
 variable "account_email" {
-  default     = null
   type        = string
-  description = "The account email. ."
+  description = "The account email."
 }
 
 #AppEngine 

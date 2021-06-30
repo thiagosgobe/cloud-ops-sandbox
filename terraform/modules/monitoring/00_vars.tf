@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-
-variable "project_id" {
-
-}
 variable "zone" {
-
+  type        = string
+  description = "GKE cluser zone, needed for istio services monitoring. Can be revealed by running \"gcloud container clusters list --filter='name:cloud-ops-sandbox' --project $project_id --format='value(zone)')\" from Google Cloud CLI"
 }
 
 variable "external_ip" {
-
+  type        = string
+  description = "The external IP of the frontend cluster. Can be revealed by running \"kubectl get service frontend-external'\" in the Google Cloud CLI."
 }
 
-variable "project_owner_email" {
 
+variable "project_id" {
+  type        = string
+  description = "The id of your project. Case-sensitive."
+}
+
+variable "account_email" {
+  type        = string
+  description = "The account email. ."
 }
 
 

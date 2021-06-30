@@ -23,7 +23,7 @@ locals {
   service_port    = 8080
   service_name    = "ratingservice"
   service_version = "prod"
-  source_path     = "${path.root}/../src/ratingservice"
+  source_path     = "${path.root}/../../src/ratingservice"
 }
 
 

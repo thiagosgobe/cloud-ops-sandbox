@@ -51,6 +51,7 @@ resource "google_sql_database" "rating_service" {
 resource "google_sql_database_instance" "rating_service" {
   name                = "ratingservice-sql-instance-${random_string.suffix_len_4.result}"
   database_version    = "POSTGRES_12"
+  region              = var.gcp_region_name
   deletion_protection = false
 
   settings {
