@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+module "monitoring" {
+  source = "./modules/monitoring"
+  #Skip alerts in case it's not "prod"  
+  count               = var.skip_alerts ? 0 : 1
+  project_id          = "${data.google_project.project.project_id}"
+  zone                = google_container_cluster.gke.location
+  external_ip         = google_container_cluster.gke.endpoint
+  account_email       = var.account_email
+  gca_service         = gca_service.service
 
-# We use gcs as our backend, so the state file will be stored
-# in a storage bucket. Since the bucket must preexists, we will create 
-# the project and bucket outside Terraform. Also since the configuration
-# of bucket can't be a variable, we create an empty config and modify it
-# in the data section.
-
-terraform {
-  backend "gcs" {}
-}
-
-data "terraform_remote_state" "state" {
-  backend = "gcs"
-  config = {
-    bucket = var.bucket_name
-  }
+  depends_on = [null_resource.delay]
 }

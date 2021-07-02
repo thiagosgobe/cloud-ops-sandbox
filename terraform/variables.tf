@@ -36,3 +36,22 @@ variable "skip_loadgen" {
   default     = false
   description = "If true, the load generator will not be deployed."
 }
+
+variable "loadgen_node_count" {
+  type        = number
+  default     = 1
+  description = "The initial and minimum number of nodes in the loadgen cluster"
+}
+
+variable "gke_node_count" {
+  type        = number
+  default     = 3
+  description = "The initial and minimum number of nodes in the GEK Cloud Sandbox Ops cluster"
+}
+
+
+variable "app_version" {
+  type        = string
+  description = "Cloud Operastions Sandbox's Version."
+}
+  

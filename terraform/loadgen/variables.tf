@@ -26,3 +26,9 @@ variable "project_id" {
   type        = string
   description = "The project id that was created by Cloud Operations Sandbox. Can be revealed by running \"gcloud config get-value project\" in the Google Cloud CLI."
 }
+
+variable "loadgen_node_count" {
+  type        = number
+  defualt     = 1
+  description = "The initial and minimum number of nodes in the loadgen cluster"
+}
