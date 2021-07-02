@@ -191,7 +191,8 @@ applyTerraform() {
   # To Do: to convert to version handling for backward compatibility
   # Last release date and Project creation time converted to unix time
   release_date=$(date -d "2021-07-01" '+%s') 
-  project_created_time=$(date -d `gcloud projects describe ${project_id} --format="value(createTime)"` '+%s') 
+  project_created_time=$(date -d "$(gcloud projects describe "${project_id}" --format="value(createTime)")" '+%s')
+  app_ver ="0_7"
   
   rm -f .terraform/terraform.tfstate
 
@@ -206,18 +207,19 @@ applyTerraform() {
     terraform init -backend-config "bucket=${bucket_name}" -lockfile=false # lock-free to prevent access fail
   fi
   
+
   log "Apply Terraform automation"
   if [ $(( ("$release_date" - "$project_created_time")/(60*60*24) )) -gt 0 ]; then #project created before release, need to use backward compatible prams load and GKE number of m
         if [[ -n "$billing_id" ]]; then
-        terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}" -var="gke_node_count=4"  -var="loadgen_node_count=2"
+        terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}"  --var="app_version=${app_ver}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}" -var="gke_node_count=4"  -var="loadgen_node_count=2"
       else
-        terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  -var="skip_loadgen=${skip_loadgen:-false}" -var="gke_node_count=4" -var="loadgen_node_count=2"
+        terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"   --var="app_version=${app_ver}" -var="skip_loadgen=${skip_loadgen:-false}" -var="gke_node_count=4" -var="loadgen_node_count=2"
       fi
   else
       if [[ -n "$billing_id" ]]; then
-        terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}"
+        terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}"  --var="app_version=${app_ver}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}"
       else
-        terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  -var="skip_loadgen=${skip_loadgen:-false}"
+        terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  --var="app_version=${app_ver}"  -var="skip_loadgen=${skip_loadgen:-false}"
       fi
   fi
 }
