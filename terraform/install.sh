@@ -188,6 +188,11 @@ createProject() {
 }
 
 applyTerraform() {
+  # To Do: to convert to version handling for backward compatibility
+  # Last release date and Project creation time converted to unix time
+  release_date=$(date -d "2021-07-01" '+%s') 
+  project_created_time=$(date -d `gcloud projects describe ${project_id} --format="value(createTime)"` '+%s') 
+  
   rm -f .terraform/terraform.tfstate
 
   log "Initialize terraform backend with bucket ${bucket_name}"
@@ -200,17 +205,25 @@ applyTerraform() {
     gcloud auth application-default login
     terraform init -backend-config "bucket=${bucket_name}" -lockfile=false # lock-free to prevent access fail
   fi
-
+  
   log "Apply Terraform automation"
-  if [[ -n "$billing_id" ]]; then
-    terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}"
+  if [ $(( ("$release_date" - "$project_created_time")/(60*60*24) )) -gt 0 ]; then #project created before release, need to use backward compatible prams load and GKE number of m
+        if [[ -n "$billing_id" ]]; then
+        terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}" -var="gke_node_count=4"  -var="loadgen_node_count=2"
+      else
+        terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  -var="skip_loadgen=${skip_loadgen:-false}" -var="gke_node_count=4" -var="loadgen_node_count=2"
+      fi
   else
-    terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  -var="skip_loadgen=${skip_loadgen:-false}"
+      if [[ -n "$billing_id" ]]; then
+        terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}"
+      else
+        terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  -var="skip_loadgen=${skip_loadgen:-false}"
+      fi
   fi
 }
 
 authenticateCluster() {
-  CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $project_id --format="value(zone)")
+  CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project "$project_id" --format="value(zone)")
   gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
   # Make alias for this kubectl context
   kubectx main=.
@@ -251,7 +264,7 @@ getExternalIp() {
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
       log "Hipster Shop app is available at http://$external_ip"
-      sendTelemetry $project_id hipstershop-available
+      sendTelemetry "$project_id" hipstershop-available
   else
       log "error: Hipsterhop app at http://$external_ip is unreachable"
       sendTelemetry $project_id hipstershop-unavailable
