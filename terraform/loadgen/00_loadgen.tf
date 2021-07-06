@@ -71,20 +71,20 @@ resource "google_container_cluster" "gke_loadgen" {
       machine_type = "n1-standard-2"
 
       oauth_scopes = [
-        "https://www.googleapis.com/auth/cloud-platform"
+        "https://www.googleapis.com/auth/cloud-platform"  
       ]
 
       labels = {
         environment = "dev",
-        cluster     = "loadgenerator-main"
+        cluster = "loadgenerator-main"
       }
     }
 
-    initial_node_count = var.loadgen_node_count
+    initial_node_count = 1
 
     autoscaling {
-      min_node_count = var.loadgen_node_count
-      max_node_count = 3
+      min_node_count = 1
+      max_node_count = 10
     }
 
     management {
@@ -114,7 +114,7 @@ resource "null_resource" "set_gke_context" {
   }
 
   depends_on = [
-    google_container_cluster.gke_loadgen,
+    google_container_cluster.gke_loadgen, 
     null_resource.current_project
   ]
 }

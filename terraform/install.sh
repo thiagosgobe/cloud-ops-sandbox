@@ -230,7 +230,7 @@ applyTerraform() {
 }
 
 authenticateCluster() {
-  CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project "$project_id" --format="value(zone)")
+  CLUSTER_ZONE=$(gcloud container clusters list --filter="name:cloud-ops-sandbox" --project $project_id --format="value(zone)")
   gcloud container clusters get-credentials cloud-ops-sandbox --zone "$CLUSTER_ZONE"
   # Make alias for this kubectl context
   kubectx main=.
@@ -271,7 +271,7 @@ getExternalIp() {
   done;
   if [[ $(curl -sL -w "%{http_code}"  "http://$external_ip" -o /dev/null) -eq 200 ]]; then
       log "Hipster Shop app is available at http://$external_ip"
-      sendTelemetry "$project_id" hipstershop-available
+      sendTelemetry $project_id hipstershop-available
   else
       log "error: Hipsterhop app at http://$external_ip is unreachable"
       sendTelemetry $project_id hipstershop-unavailable
