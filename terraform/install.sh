@@ -189,10 +189,9 @@ createProject() {
 
 applyTerraform() {
   # To Do: to convert to version handling for backward compatibility
-  # Last release date and Project creation time converted to unix time
-  release_date=$(date -d "2021-07-01" '+%s') 
-  project_created_time=$(date -d "$(gcloud projects describe "${project_id}" --format="value(createTime)")" '+%s')
-  app_ver ="0_7"
+  # 1. Check if cluster already exist if not continute with clean install, if exist check version, if before 0_7 install old spec 
+
+  app_ver="0_7"
   
   rm -f .terraform/terraform.tfstate
 
@@ -206,22 +205,28 @@ applyTerraform() {
     gcloud auth application-default login
     terraform init -backend-config "bucket=${bucket_name}" -lockfile=false # lock-free to prevent access fail
   fi
-  
 
-  log "Apply Terraform automation"
-  if [ $(( ("$release_date" - "$project_created_time")/(60*60*24) )) -gt 0 ]; then #project created before release, need to use backward compatible prams load and GKE number of m
-        if [[ -n "$billing_id" ]]; then
-        terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}"  --var="app_version=${app_ver}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}" -var="gke_node_count=4"  -var="loadgen_node_count=2"
-      else
-        terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"   --var="app_version=${app_ver}" -var="skip_loadgen=${skip_loadgen:-false}" -var="gke_node_count=4" -var="loadgen_node_count=2"
-      fi
-  else
-      if [[ -n "$billing_id" ]]; then
-        terraform apply -auto-approve -var="billing_account=${billing_acct}" -var="project_id=${project_id}"  --var="app_version=${app_ver}" -var="bucket_name=${bucket_name}" -var="skip_loadgen=${skip_loadgen:-false}"
-      else
-        terraform apply -auto-approve -var="project_id=${project_id}" -var="bucket_name=${bucket_name}"  --var="app_version=${app_ver}"  -var="skip_loadgen=${skip_loadgen:-false}"
-      fi
+  #build Terraform apply command 
+  terraform_command="terraform apply -auto-approve -var=\"project_id=${project_id}\" -var=\"bucket_name=${bucket_name}\" -var=\"skip_loadgen=${skip_loadgen:-false}\""
+
+  #If billing account provided specify it 
+  if [[ -n "$billing_id" ]]; then
+    terraform_command+="-var=\"billing_account=${billing_acct}\"" 
   fi
+
+  #check if new installtion or if cluster already and what is the version
+  gke_location="$(gcloud container clusters list --format="value(location)" --filter name=cloud-ops-sandbox)"
+  if [[ -n "$gke_location" ]]; then 
+    gke_version="$(gcloud container clusters describe cloud-ops-sandbox --region "${gke_location}"  --format="value(resourceLabels.version)")"
+  fi
+  #If cluster exist and it's older version use backward comp. params
+  if [[ -n "$gke_location"  || -z "$gke_version" ]]; then 
+    terraform_command+='-var="gke_node_count=4" -var="loadgen_node_count=2" --var="app_version=0"'
+  else
+    terraform_command+="-var=\"app_version=${app_ver}\"" 
+  fi 
+  log "Apply Terraform automation"
+  eval $terraform_command
 }
 
 authenticateCluster() {
