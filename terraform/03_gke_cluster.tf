@@ -56,9 +56,6 @@ resource "google_container_cluster" "gke" {
   workload_identity_config {
     identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
   }
-  resource_labels = {
-    "version" = var.app_version
-  }
 
   # Using an embedded resource to define the node pool. Another
   # option would be to create the node pool as a separate resource and link it
