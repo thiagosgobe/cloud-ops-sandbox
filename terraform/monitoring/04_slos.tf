@@ -178,6 +178,7 @@ resource "google_monitoring_slo" "rating_service_availability_slo" {
   # Identify of the service is built after the following template: gae:${project_id}_servicename
   service      = "gae:${var.project_id}_ratingservice"
   slo_id       = "ratingservice-availability-slo"
+  count        = var.skip_ratingservice ? 0 : 1
   display_name = "Rating Service Availability SLO with request base SLI (good total ratio)"
 
   # The goal sets our objective for successful requests over the 30 day rolling window period
@@ -225,6 +226,7 @@ resource "google_monitoring_slo" "rating_service_latency_slo" {
   # Identify of the service is built after the following template: gae:${project_id}_servicename
   service      = "gae:${var.project_id}_ratingservice"
   slo_id       = "ratingservice-latency-slo"
+  count        = var.skip_ratingservice ? 0 : 1
   display_name = "Rating Service Latency SLO with request base SLI (distribution cut)"
 
   goal                = 0.99
@@ -259,6 +261,7 @@ resource "google_monitoring_slo" "rating_service_freshness_slo" {
   # Identify of the service is built after the following template: gae:${project_id}_servicename
   service      = "gae:${var.project_id}_ratingservice"
   slo_id       = "ratingservice-freshness-slo"
+  count        = var.skip_ratingservice ? 0 : 1
   display_name = "Rating freshness SLO with window based SLI"
 
   goal                = 0.99

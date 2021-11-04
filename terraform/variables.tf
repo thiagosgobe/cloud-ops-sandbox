@@ -38,6 +38,11 @@ variable "appengine_region" {
   description = "App Engine defult GCP region."
 }
 
+variable "skip_ratingservice" {
+  default     = false
+  description = "If true, the Rating Service will not be deployed."
+}
+
 variable "app_version" {
   default     = 0
   type        = string

@@ -90,6 +90,7 @@ EOF
 
 resource "google_logging_metric" "ratingservice_logging_metric" {
   name   = "ratingservice_recollect_requests_count"
+  count  = var.skip_ratingservice ? 0 : 1
   filter = "resource.type=gae_app AND resource.labels.module_id=ratingservice AND resource.labels.version_id=prod protoPayload.method=POST AND protoPayload.resource=\"/ratings:recollect\""
   metric_descriptor {
     metric_kind = "DELTA" # set to DELTA for counter-based metric

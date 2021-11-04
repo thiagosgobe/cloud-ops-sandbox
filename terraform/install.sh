@@ -204,6 +204,11 @@ applyTerraform() {
 
   #build Terraform apply command 
   terraform_command="terraform apply -auto-approve -var=\"project_id=${project_id}\" -var=\"bucket_name=${bucket_name}\" -var=\"skip_loadgen=${skip_loadgen:-false}\""
+  
+  #If skipping rating service specified skip it, default skip = false 
+  if [[ -n "${skip_ratingservice}" ]]; then
+     terraform_command+=-var=\"skip_loadgen=${skip_ratingservice:true}\"
+  fi
 
   #If billing account provided specify it 
   if [[ -n "$billing_id" ]]; then
@@ -260,7 +265,12 @@ installMonitoring() {
   log "Creating monitoring examples (dashboards, uptime checks, alerting policies, etc.)..."
   pushd monitoring/
   terraform init -lockfile=false
-  terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}"
+  #If skipping rating service specified skip it, default skip = false 
+  if [[ -n "${skip_ratingservice}" ]]; then
+     erraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE} -var=\"skip_loadgen=${skip_ratingservice:true}\""
+  else
+    terraform apply --auto-approve -var="project_id=${project_id}" -var="external_ip=${external_ip}" -var="project_owner_email=${acct}" -var="zone=${CLUSTER_ZONE}"
+  fi
   popd
 }
 
@@ -379,6 +389,10 @@ parseArguments() {
       ;;
     --skip-loadgenerator)
       skip_loadgen=1
+      shift
+      ;;
+    --skip-ratingservice)
+      skip_ratingservice=1
       shift
       ;;
     --service-wait)
