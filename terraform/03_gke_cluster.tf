@@ -122,7 +122,7 @@ resource "google_container_cluster" "gke" {
   # be enabled) before the cluster can be created. This will not address the
   # eventual consistency problems we have with the API but it will make sure
   # that we're at least trying to do things in the right order.
-  depends_on = [google_project_service.gke]
+  depends_on = [module.ratingservice]
 }
 
 
@@ -195,11 +195,22 @@ resource "null_resource" "deploy_services" {
     kubectl apply -f ../kubernetes-manifests/productcatalogservice.yaml
     kubectl apply -f ../kubernetes-manifests/recommendationservice.yaml
     kubectl apply -f ../kubernetes-manifests/shippingservice.yaml
-    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${module.ratingservice.service_url}
   EOT
   }
 
   depends_on = [null_resource.install_istio]
+}
+
+
+# Set Rating service env
+resource "null_resource" "set_rating_service" {
+  count = var.skip_ratingservice ? 0 : 1
+  provisioner "local-exec" {
+    command = <<-EOT
+    kubectl set env deployment.apps/frontend RATING_SERVICE_ADDR=${module.ratingservice.service_url}
+  EOT
+  }
+  depends_on = [null_resource.deploy_services]
 }
 
 # We wait for all of our microservices to become available on kubernetes

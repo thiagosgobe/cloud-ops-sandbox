@@ -40,4 +40,10 @@ terraform {
     }
 
   }
+
+}
+  provider "google" {
+    alias = "ratingservice"
+    project = data.google_project.project.project_id
+    region  = var.appengine_region
 }
