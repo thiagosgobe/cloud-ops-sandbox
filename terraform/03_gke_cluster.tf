@@ -16,9 +16,10 @@
 
 # This is another example of the random provider. Here we're using it to pick a
 # zone in us-central1 at random.
-resource "random_shuffle" "zone" {
+
+resource "random_shuffle" "region" {
   # TODO: add us-central1-a and us-central1-c once GKE completely rolls out Oct 2 release
-  input = ["us-central1-b", "us-central1-f"]
+  input = ["us-central1"]
 
   # Seeding the RNG is technically optional but while building this we
   # found that it only ever picked `us-central-1c` unless we seeded it. Here
@@ -50,7 +51,7 @@ resource "google_container_cluster" "gke" {
   # If GKE_cluster was specify during insalltion use it otherwise set the zone by grabbing the result of the random_shuffle above. 
   # It returns a list so we have to pull the first element off. If you're looking
   # at this and thinking "huh terraform syntax looks a clunky" you are NOT WRONG
-  location = var.gke_location != "" ? var.gke_location : element(random_shuffle.zone.result, 0)
+  location = var.gke_location != "" ? var.gke_location : element(random_shuffle.region.result, 0)
 
   # Enable Workload Identity for cluster
   workload_identity_config {
@@ -95,7 +96,7 @@ resource "google_container_cluster" "gke" {
       }
     }
 
-    initial_node_count = 4
+    initial_node_count = 2
 
     autoscaling {
       min_node_count = 2
