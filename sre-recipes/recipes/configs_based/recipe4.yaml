@@ -22,17 +22,18 @@ config:
     - action: run-shell-commands
       commands:
         - |
-          PROJECT_ID="$(gcloud config get-value project)"
+          PROJECT_ID="$(gcloud config list --format 'value(core.project)')"
+          ZONE="$(gcloud container clusters describe cloud-ops-sandbox --region us-central1 --format="value(locations)" | cut -d ";" -f1)"
           cat > POLICY.YAML <<-EOF
           constraint: constraints/gcp.resourceLocations
           listPolicy:
               deniedValues:
-              - is:us-central1-a
+              - is:$ZONE
           EOF
           gcloud beta resource-manager org-policies set-policy --project $PROJECT_ID POLICY.YAML 2>&1
-          MIG="$(gcloud compute instance-groups managed list --format="value(name)" --filter="LOCATION:us-central1-a")"
-          for i in `gcloud compute instance-groups managed list-instances $MIG --zone us-central1-a --format="value(NAME)"`;
-          do gcloud compute instances stop $i --zone us-central1-a --async 2>&1;
+          MIG="$(gcloud compute instance-groups managed list --format="value(name)" --filter="LOCATION:$ZONE")"
+          for i in `gcloud compute instance-groups managed list-instances $MIG --zone $ZONE --format="value(NAME)"`;
+          do gcloud compute instances stop $i --zone $ZONE --async 2>&1;
           done
           rm -f POLICY.YAML
 
@@ -40,7 +41,7 @@ config:
     - action: run-shell-commands
       commands:
         - |
-          PROJECT_ID="$(gcloud config get-value project)"
+          PROJECT_ID="$(gcloud config list --format 'value(core.project)')"
           gcloud beta resource-manager org-policies delete --project $PROJECT_ID constraints/gcp.resourceLocations 2>&1
 
   hint: |
